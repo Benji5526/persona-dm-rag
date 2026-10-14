@@ -9,7 +9,7 @@ import { VARIANTS } from "./experiment-variants.mjs";
 
 const [name, outPath] = process.argv.slice(2);
 if (!VARIANTS[name] || !outPath) {
-  console.error("사용법: node scripts/run-experiment.mjs <baseline|A|B> 결과.json");
+  console.error(`사용법: node scripts/run-experiment.mjs <${Object.keys(VARIANTS).join("|")}> 결과.json [시각]`);
   process.exit(1);
 }
 if (!(await pingOllama())) {
@@ -18,10 +18,10 @@ if (!(await pingOllama())) {
 }
 
 const NOW = new Date(process.argv[4] ?? "2026-10-15T00:45:00+09:00"); // 기본: 목요일 00:45 KST (지난 STEP 7 관찰과 같은 요일). 4번째 인자로 바꿔 흔들림을 잴 수 있다
-const { parts, analyzeOpts } = VARIANTS[name];
+const { parts, analyzeOpts, askOpts = {} } = VARIANTS[name];
 const rows = [];
 for (const [i, [kind, q]] of Q.entries()) {
-  const r = await ask(q, { now: NOW, parts, analyzeOpts });
+  const r = await ask(q, { now: NOW, parts, analyzeOpts, ...askOpts });
   const a = r.analysis;
   rows.push({
     no: i + 1,

@@ -27,4 +27,11 @@ export const VARIANTS = {
     parts: { system: SYSTEM_B, groundingNormal: GROUNDING_NORMAL_B, groundingWeak: GROUNDING_WEAK_B },
     analyzeOpts: { holdMarker: HOLD_MARKER },
   },
+  // ---- 자료 확장(17청크) 뒤 "자료에 없음" 보류 후퇴를 줄이는 시험 (docs/hold-regression-test.md) ----
+  // askOpts는 ask()에 그대로 넘긴다. 기준(A17)은 현재 기본값(A)이며 청크 17개에서 다시 돌린 것이다.
+  A17: { parts: {}, analyzeOpts: {}, askOpts: {} },
+  K2: { parts: {}, analyzeOpts: {}, askOpts: { k: 2 } }, // 찾는 자료를 2개로
+  K4: { parts: {}, analyzeOpts: {}, askOpts: { k: 4 } }, // 찾는 자료를 4개로 (#15에서 NE-014가 4위로 다시 들어옴)
+  PIN14: { parts: {}, analyzeOpts: {}, askOpts: { pin: ["NE-014"] } }, // NE-014(운영자 이관 기준)를 항상 포함
+  NO16: { parts: {}, analyzeOpts: {}, askOpts: { exclude: ["NE-016"] } }, // NE-016(DM 답변 방식)만 빼고 3개를 채움 (K2와 달리 청크 수는 그대로)
 };

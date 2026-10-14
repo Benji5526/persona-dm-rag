@@ -24,13 +24,19 @@ export function analyze(answer, hits, opts = {}) {
 }
 
 // 검색 → 프롬프트 → LLM. onHits(hits)는 검색 직후, onToken(조각)은 답변이 만들어지는 대로 부른다.
-// now/parts/analyzeOpts는 실험용(시각 고정, 문구 덮어쓰기, 판정 방식). 기본값은 운영 동작 그대로다.
-export async function ask(question, { k = 3, rag = true, onHits, onToken, now, parts, analyzeOpts } = {}) {
+// now/parts/analyzeOpts/pin은 실험용(시각 고정, 문구 덮어쓰기, 판정 방식, 항상 포함할 청크). 기본값은 운영 동작 그대로다.
+export async function ask(question, { k = 3, rag = true, onHits, onToken, now, parts, analyzeOpts, pin, exclude } = {}) {
   let hits = null;
   let messages = [{ role: "user", content: question }];
   const t0 = Date.now();
   if (rag) {
-    hits = await search(question, k);
+    // exclude(실험용): 검색 결과에서 해당 청크를 빼고 다음 순위로 k개를 채운다
+    hits = exclude?.length ? (await search(question, 100)).filter((h) => !exclude.includes(h.id)).slice(0, k) : await search(question, k);
+    if (pin?.length) {
+      // 검색 결과에 없더라도 pin한 청크를 뒤에 덧붙인다(1위는 그대로라서 약한 근거 판정은 바뀌지 않는다)
+      const all = await search(question, 100);
+      hits = [...hits, ...all.filter((h) => pin.includes(h.id) && !hits.some((x) => x.id === h.id))];
+    }
     messages = buildMessages(question, hits, now, parts);
     onHits?.(hits);
   }
