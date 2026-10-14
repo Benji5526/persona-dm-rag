@@ -32,22 +32,35 @@ function nowKST(now = new Date()) {
   }).format(now);
 }
 
+// 문구 묶음. 기본값은 CLAUDE.md 생성 계약이다. 실험(scripts/run-experiment.mjs)에서만 일부를 덮어쓴다.
+export const DEFAULT_PARTS = {
+  system: SYSTEM_MESSAGE,
+  intro: INTRO,
+  groundingNormal: GROUNDING_NORMAL,
+  groundingWeak: GROUNDING_WEAK,
+  citeRule: CITE_RULE,
+  citeReminder: CITE_REMINDER,
+};
+
 // hits: search()의 결과(점수 내림차순). 1위 점수가 기준 미만이면 근거 원칙이 "약한 근거" 문구로 바뀐다.
-export function buildPrompt(question, hits, now = new Date()) {
+// parts: 실험용으로 문구 일부를 덮어쓴다(기본 {}).
+export function buildPrompt(question, hits, now = new Date(), parts = {}) {
+  const p = { ...DEFAULT_PARTS, ...parts };
   const weak = hits[0].score < WEAK_THRESHOLD;
   const head = [
-    INTRO, // ① 자료 소개
-    weak ? GROUNDING_WEAK : GROUNDING_NORMAL, // ② 근거 원칙
-    CITE_RULE, // ③ 출처 규칙
+    p.intro, // ① 자료 소개
+    weak ? p.groundingWeak : p.groundingNormal, // ② 근거 원칙
+    p.citeRule, // ③ 출처 규칙
     `현재 시각은 ${nowKST(now)}(KST)입니다. '오늘', '내일', '다음 주' 같은 상대 표현은 이 시각을 기준으로 해석합니다.`, // ④ 시각
   ].join("\n");
   const material = hits.map((h) => `[${h.id}] (${h.section}) ${h.text}`).join("\n\n"); // ⑤ 자료 (대괄호 안에는 ID만)
-  return `${head}\n\n[자료]\n${material}\n\n[질문]\n${question}\n\n${CITE_REMINDER}`; // ⑥ 질문, ⑦ 출처 규칙 한 번 더
+  return `${head}\n\n[자료]\n${material}\n\n[질문]\n${question}\n\n${p.citeReminder}`; // ⑥ 질문, ⑦ 출처 규칙 한 번 더
 }
 
-export function buildMessages(question, hits, now = new Date()) {
+export function buildMessages(question, hits, now = new Date(), parts = {}) {
+  const p = { ...DEFAULT_PARTS, ...parts };
   return [
-    { role: "system", content: SYSTEM_MESSAGE },
-    { role: "user", content: buildPrompt(question, hits, now) },
+    { role: "system", content: p.system },
+    { role: "user", content: buildPrompt(question, hits, now, parts) },
   ];
 }

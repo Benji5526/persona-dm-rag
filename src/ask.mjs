@@ -10,32 +10,35 @@ import { pingOllama, chatStream, OLLAMA_CHECK_HINT } from "./ollama.mjs";
 const HOLD_PHRASE = "확인한 뒤에 답변드릴게요";
 
 // 답변을 분석한다. 근거 표시와 운영자 확인 여부는 LLM이 아니라 프로그램이 판단한다(CLAUDE.md 생성 계약).
-export function analyze(answer, hits) {
+// opts(실험용): holdMarker = 보류를 알리는 표시 글자(없으면 보류 문구로 판단), idCondition = "ID 없음"을 운영자 확인 조건에 넣을지(기본 true).
+export function analyze(answer, hits, opts = {}) {
+  const { holdMarker = null, idCondition = true } = opts;
   const weak = hits[0].score < WEAK_THRESHOLD;
   const cited = new Set(hits.filter((h) => answer.includes(h.id)).map((h) => h.id)); // 괄호 모양과 상관없이 ID 글자가 있으면 ✓
-  const hold = answer.includes(HOLD_PHRASE);
+  const hold = holdMarker ? answer.includes(holdMarker) : answer.includes(HOLD_PHRASE);
   const reasons = [];
   if (weak) reasons.push("관련 자료가 약함");
-  if (hold) reasons.push("답변이 보류 문구를 포함함");
-  if (cited.size === 0) reasons.push("답변에 근거 ID 표시가 없음");
+  if (hold) reasons.push(holdMarker ? "모델이 자료에 답이 없다고 표시함" : "답변이 보류 문구를 포함함");
+  if (idCondition && cited.size === 0) reasons.push("답변에 근거 ID 표시가 없음");
   return { weak, cited, hold, needsOperator: reasons.length > 0, reasons };
 }
 
 // 검색 → 프롬프트 → LLM. onHits(hits)는 검색 직후, onToken(조각)은 답변이 만들어지는 대로 부른다.
-export async function ask(question, { k = 3, rag = true, onHits, onToken } = {}) {
+// now/parts/analyzeOpts는 실험용(시각 고정, 문구 덮어쓰기, 판정 방식). 기본값은 운영 동작 그대로다.
+export async function ask(question, { k = 3, rag = true, onHits, onToken, now, parts, analyzeOpts } = {}) {
   let hits = null;
   let messages = [{ role: "user", content: question }];
   const t0 = Date.now();
   if (rag) {
     hits = await search(question, k);
-    messages = buildMessages(question, hits);
+    messages = buildMessages(question, hits, now, parts);
     onHits?.(hits);
   }
   const searchMs = Date.now() - t0;
   const t1 = Date.now();
   const answer = await chatStream(messages, onToken);
   const answerMs = Date.now() - t1;
-  return { hits, answer, analysis: hits ? analyze(answer, hits) : null, searchMs, answerMs };
+  return { hits, answer, analysis: hits ? analyze(answer, hits, analyzeOpts) : null, searchMs, answerMs };
 }
 
 async function main() {
