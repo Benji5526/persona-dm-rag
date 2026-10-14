@@ -34,8 +34,18 @@
 - url은 `docs/persona.md#제목`(제목의 공백은 하이픈). section은 절 제목.
 - 말투는 청크가 아니라 `docs/tone.md`에 둔다(STEP 6에서 시스템 메시지를 쓸 때 참고).
 
+## 임베딩 계약
+- 모델 `onnx-community/embeddinggemma-300m-ONNX`, dtype `q8`, transformers.js(`@huggingface/transformers`)로 Node.js에서 실행, 768차원.
+- **벡터 만드는 방법은 모델 카드의 공식 방식**이다: `AutoTokenizer` + `AutoModel`을 불러 `tokenizer([text], { padding: true })`를 넣고,
+출력의 `sentence_embedding`을 그대로 쓴다(이미 크기 1). `pipeline("feature-extraction")` + mean pooling은 쓰지 않는다.
+이유: 두 방식의 벡터는 서로 호환되지 않고(같은 문서의 코사인 0.004), 공식 방식이 질문 구분이 더 뚜렷했다(`docs/embedding-experiment.md`).
+- 입력 형식(모델 카드): 문서는 `"title: " + section + " | text: " + text`, 질문은 `"task: search result | query: " + question`.
+- `src/embedder.mjs` 한 곳에서만 정의하고 모델은 한 번만 불러와 재사용한다. export: `embedDocument(chunk)`, `embedQuery(question)`, `MODEL`, `DTYPE`, `METHOD`, `DIM`.
+- 벡터 저장소 `data/vectors.json`은 `{ model, dtype, method, dim, createdAt, chunks: [{ id, text, url, section, vector }] }`.
+저장소의 model·dtype·method가 현재 embedder와 다르면 검색을 거부하고 "build-index를 다시 실행하라"고 안내한다.
+- 이 계약의 값을 바꾸면 모든 청크를 다시 임베딩해야 한다.
+
 ## 결정 필요
-- 임베딩 모델과 설정은 무엇으로 할까?
 - 검색 결과를 몇 개 보여 주고, 점수가 몇 점 아래면 "관련 자료가 약함"으로 볼까?
 - LLM에게 어떤 규칙(시스템 메시지)을 줄까? (페르소나 말투, 근거 원칙, 보류 문구)
 - 답변 초안의 길이와 형식은? 운영자에게 넘길 때 어떤 표시를 할까?
