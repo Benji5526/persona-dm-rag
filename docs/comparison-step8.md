@@ -1,5 +1,7 @@
 # STEP 8 비교 실험: RAG가 있을 때와 없을 때
 
+> ※ 이 기록은 청크 14개(자료 확장 전) 기준이다. 청크를 17개(NE-015~017 추가)로 늘린 뒤의 재측정은 `docs/corpus-expansion.md`에 있다.
+
 같은 질문 8개를 **RAG 없이**(검색도 시스템 메시지도 없이 질문만 LLM에 보냄)와 **RAG로**(채택된 기본 프롬프트, 실험 A 적용) 각각 3번씩 돌렸다. 모델은 `qwen3.5:2b`, 온도 0이다.
 재현: `node scripts/compare-rag.mjs 결과.json` (Ollama가 켜져 있어야 한다). 원본은 `experiments/compare-rag.json`.
 

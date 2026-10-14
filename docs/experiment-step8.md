@@ -1,5 +1,7 @@
 # STEP 8 실험: 보류 문구 과다 문제를 A → B → C로 하나씩 시험
 
+> ※ 이 기록은 청크 14개(자료 확장 전) 기준이다. 청크를 17개(NE-015~017 추가)로 늘린 뒤의 재측정은 `docs/corpus-expansion.md`에 있다.
+
 STEP 7에서 시스템 메시지의 규칙이 지켜지지 않은 문제(보류 문구가 거의 모든 답변에 붙음, 운영자 확인 표시가 무의미)를 한 번에 하나씩 바꿔서 시험했다. 질문은 STEP 7의 20개, 모델은 `qwen3.5:2b`, 온도 0이다.
 재현: `node scripts/run-experiment.mjs <baseline|A|B> 결과.json [시각]` 후 `node scripts/compare-variants.mjs …` (Ollama가 켜져 있어야 한다). 원본 결과는 `experiments/`에 있다.
 

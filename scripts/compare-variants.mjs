@@ -13,7 +13,8 @@ function withoutIdCondition(row) {
 }
 
 // 한 번의 실행(20개 답변)을 숫자 지표로 바꾼다.
-function metrics(rows) {
+function metrics(allRows) {
+  const rows = allRows.filter((r) => r.no <= 20); // 자료 확장 뒤에 덧붙인 #21~는 확장 전과 비교할 수 없으므로 뺀다
   const exp = rows.filter((r) => HOLD_EXPECTED.has(r.no));
   const non = rows.filter((r) => !HOLD_EXPECTED.has(r.no));
   return {

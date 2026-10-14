@@ -1,5 +1,7 @@
 # 약한 근거 기준점 측정 (STEP 4-0 결정 근거)
 
+> ※ 이 기록은 청크 14개(자료 확장 전) 기준이다. 청크를 17개(NE-015~017 추가)로 늘린 뒤의 재측정은 `docs/corpus-expansion.md`에 있다.
+
 임베딩은 `embeddinggemma-300m`(q8, `sentence_embedding`)이고, 청크 14개를 대상으로 질문 50개의 1위 점수를 측정했다.
 재현: 프로젝트 루트에서 `node scripts/measure-threshold.mjs 결과.txt`
 

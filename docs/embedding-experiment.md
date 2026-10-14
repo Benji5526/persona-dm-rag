@@ -1,5 +1,7 @@
 # 임베딩 방식 비교 실험 (STEP 3-0 결정 근거)
 
+> ※ 이 기록은 청크 14개(자료 확장 전) 기준이다. 청크를 17개(NE-015~017 추가)로 늘린 뒤의 재측정은 `docs/corpus-expansion.md`에 있다.
+
 모델 `onnx-community/embeddinggemma-300m-ONNX`(dtype q8)을 두 가지 방식으로 쓰고 같은 청크 14개, 질문 10개로 비교했다.
 재현: 프로젝트 루트에서 `node scripts/compare-embedding.mjs 결과.txt`
 

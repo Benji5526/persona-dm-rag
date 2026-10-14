@@ -1,5 +1,7 @@
 # STEP 5 관찰 기록: 검색은 무엇을 잘하고 무엇을 못하나
 
+> ※ 이 기록은 청크 14개(자료 확장 전) 기준이다. 청크를 17개(NE-015~017 추가)로 늘린 뒤의 재측정은 `docs/corpus-expansion.md`에 있다.
+
 `src/search.mjs`의 `search()`로 질문 22개를 실행해 상위 3개와 점수를 기록했다. (청크 14개, `WEAK_THRESHOLD` 0.25)
 재현: 프로젝트 루트에서 `node scripts/observe-step5.mjs 결과.txt`
 
